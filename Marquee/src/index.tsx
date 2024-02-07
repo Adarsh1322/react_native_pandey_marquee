@@ -112,11 +112,7 @@ export const Marquee = memo(
           >
             <View
               onLayout={(ev) => {
-                console.log('event value:',ev.nativeEvent.layout.width)
-                console.log('check screenwidth', Dimensions.get('window').width);
-                console.log('check autofill value', autofill)
                 textWidth.value = autofill ? ev.nativeEvent.layout.width : Dimensions.get('window').width;
-
               }}
             >
                 {children}
