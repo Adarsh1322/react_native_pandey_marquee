@@ -1,4 +1,4 @@
-import  React,{useState,memo,PropsWithChildren} from 'react';
+import  React,{useState,memo,PropsWithChildren, ReactNode} from 'react';
 import type { ViewStyle } from 'react-native';
 import { StyleSheet } from 'react-native';
 import { View, Dimensions } from 'react-native';
@@ -10,7 +10,8 @@ import Animated, {
   useFrameCallback,
   useSharedValue,
 } from 'react-native-reanimated';
-
+import LinearGradient from 'react-native-linear-gradient';
+type LinearGradientColors = string[];
 const AnimatedChild = ({
   index,
   children,
@@ -54,13 +55,16 @@ export type MarqueeProps = PropsWithChildren<{
   style?: ViewStyle;
   direction?:string;
   autofill?: boolean; // New prop to control autofill behavior
+  backgroundColor?: string; // Solid background color
+  linearGradientColors?: LinearGradientColors; // Array of colors for linear gradient
 }>;
 
 /**
  * Used to animate the given children in a horizontal manner.
  */
 export const Marquee = memo(
-  ({ speed = 1, children, spacing = 0, style,direction = 'left',autofill }: MarqueeProps) => {
+  ({ speed = 1, children, spacing = 0, style,direction = 'left',autofill,backgroundColor,
+  linearGradientColors, }: MarqueeProps) => {
     const parentWidth = useSharedValue(0);
     const textWidth = useSharedValue(0);
     const [cloneTimes, setCloneTimes] = useState(0);
@@ -90,7 +94,20 @@ export const Marquee = memo(
       },
       []
     );
-
+    const renderBackground = (): ReactNode => {
+      if (backgroundColor) {
+        return <View style={{ backgroundColor, position: 'absolute', top: 0, bottom: 0, left: 0, right: 0 }} />;
+      } else if (linearGradientColors) {
+        return (
+          <LinearGradient
+            colors={linearGradientColors}
+            style={{ flex: 1, zIndex: -1, position: 'absolute', top: 0, bottom: 0, left: 0, right: 0 }}
+          />
+        );
+      }
+      return null; // Return null if no background specified
+    };
+    
 
     return (
       <Animated.View
@@ -100,6 +117,7 @@ export const Marquee = memo(
         }}
         pointerEvents="box-none"
       >
+         {renderBackground()}
         <Animated.View style={direction === 'left'?styles.row : styles.row2} pointerEvents="box-none">
           {
             // We are adding the text inside a ScrollView because in this way we
